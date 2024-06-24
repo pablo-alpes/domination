@@ -1,14 +1,14 @@
 package service;
 
 import constants.constants;
-import model.Continent;
 import model.ContinentImpl;
+import model.CountryImpl;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class MapFetchService {
@@ -80,6 +80,51 @@ public class MapFetchService {
         continent.setContinentId(0); //TODO -- Where to storage all the continents for the current game List<Continent>
 
         return continent;
+    }
+
+
+    public static CountryImpl populateCountries(String countryLine) {
+        //1 La-Coruna 1 59 39
+        //2 Lugo 1 98 42
+        //int Str int int int
+
+        //Split parameters from file to populate continent
+        //source: https://stackoverflow.com/questions/29447582/java-searching-for-words-in-strings-separated-by-spaces
+        String delimiter = " ";
+        String[] parameters = countryLine.split(delimiter);
+
+        //creating and populating object
+        CountryImpl country = new CountryImpl(); //TODO -- Fix call to interface to Impl
+        country.setCountryName(parameters[1]);
+        country.setCountryId(Integer.parseInt(parameters[0]));
+        country.setContinentId(Integer.parseInt(parameters[2]));
+        country.setOwnership("");
+        country.setArmies(0);
+         //TODO -- Where to storage all the continents for the current game List<Continent>
+
+        return country;
+    }
+
+    public static CountryImpl populateBorders(String countryLine) {
+        // 1 2 3
+        //int* int int
+
+        //Split parameters from file to populate continent
+        //source: https://stackoverflow.com/questions/29447582/java-searching-for-words-in-strings-separated-by-spaces
+        String delimiter = " ";
+        String[] parameters = countryLine.split(delimiter);
+
+        //creating and populating object
+        CountryImpl country = new CountryImpl(); //TODO -- Fix call to interface to Impl
+        //https://stackoverflow.com/questions/52509610/convert-array-of-strings-to-list-of-integers
+        List<Integer> borders = new ArrayList<Integer>();
+        borders = Arrays.stream(parameters)    // stream of String
+                .map(Integer::valueOf) // stream of Integer
+                .collect(Collectors.toList());
+        country.setBorders(borders);
+        //TODO -- Where to storage all the continents for the current game List<Continent>
+
+        return country;
     }
 
 }

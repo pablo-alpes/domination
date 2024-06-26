@@ -4,12 +4,28 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Getter
+
 @Setter
+@Getter
 @NoArgsConstructor
 public class BoardImpl implements Board {
-    List<Continent> continents;
-    List<Country> countries;
+    List<Continent> continents = new ArrayList<Continent>();
+    List<Country> countries = new ArrayList<Country>();
+    List<Player> players = new ArrayList<Player>();
+
+    public void addCountry(Country country) {
+        countries.add(country);
+    }
+
+    public void addContinent(Continent continent) {
+        continents.add(continent);
+    }
+
+    public void addPlayer(Player player) {
+        this.players.add(player);
+    }
+
 }

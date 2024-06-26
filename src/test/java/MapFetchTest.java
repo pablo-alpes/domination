@@ -1,12 +1,13 @@
+import service.MapFetchService;
+
+import model.BoardImpl;
 import model.ContinentImpl;
-import model.Country;
 import model.CountryImpl;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import java.io.FileNotFoundException;
 
 import org.springframework.boot.SpringBootConfiguration;
-import service.MapFetchService;
 
 import static org.junit.Assert.*;
 
@@ -103,14 +104,20 @@ public class MapFetchTest {
     //@DisplayName("Map correctly a continent from the map file")
 
     @Test
-    //@DisplayName("Fetches map from file map and does the mapping towards the object Continent and Country model")
-    public void GivenMapWhenReadThenFetchMapToObjectModel() {
-        /*
-         1. The file will be parsed sequentially : continents, countries and borders.
-         2. Each section has its own logic, then it will be needed to be decoded accordingly to then be instantiated in the corresponding object
-        */
+    @DisplayName("Fetches map from file map and does the mapping towards the object Continent and Country model")
+    public void GivenMapWhenReadThenFetchMapToObjectModel() throws FileNotFoundException {
         //ARRANGE
+        String filename = "spain/spain.map";
+        BoardImpl board = new BoardImpl();
+        //ACT
+        board = MapFetchService.translatorToBoard(filename);
+        //ASSERT
+        System.out.println(board.getCountries().get(51).getBorders());
+        assertEquals(19, board.getContinents().size());
+        assertEquals(52, board.getCountries().size());
+        assertEquals(3, board.getCountries().get(51).getBorders().size()); //spain test: tests the latest case of the borders list has been correctly parsed.
     }
 
 
 }
+

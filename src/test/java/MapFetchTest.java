@@ -1,13 +1,15 @@
+import model.*;
 import service.MapFetchService;
 
-import model.BoardImpl;
-import model.ContinentImpl;
-import model.CountryImpl;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import java.io.FileNotFoundException;
+import java.util.List;
 
 import org.springframework.boot.SpringBootConfiguration;
+import service.OwnershipService;
+import service.PlayerService;
+import service.UserRegistrationService;
 
 import static org.junit.Assert.*;
 
@@ -116,6 +118,41 @@ public class MapFetchTest {
         assertEquals(19, board.getContinents().size());
         assertEquals(52, board.getCountries().size());
         assertEquals(3, board.getCountries().get(51).getBorders().size()); //spain test: tests the latest case of the borders list has been correctly parsed.
+    }
+
+    @Test
+    @DisplayName("Random and even distribution of countries between 2 players")
+    public void GivenPlayersAndBoardThenDistributeRandomlyCountriesThenReturnPlayersOwnership() throws FileNotFoundException {
+        //ARRANGE
+        String filename = "spain/spain.map";
+        BoardImpl board = new BoardImpl();
+        board = MapFetchService.translatorToBoard(filename);
+
+        //User registration and players creation
+        String username = "Chilean God";
+        List<PlayerImpl> players = PlayerService.createPlayers(username);
+        //ACT
+        // Random allocation of countries ownership
+        OwnershipService.randomCountryAllocation(players, board);
+        //ASSERT
+        assertEquals(players.getFirst().getOwnerships().size(),52/2);
+        assertEquals(players.getLast().getOwnerships().size(),52/2);
+
+        System.out.println("Ownership status");
+        System.out.println(username + " v/s Boring machine");
+        System.out.println("--------------------------------");
+        for (Player player : players) {
+            for (int i = 0; i < players.getFirst().getOwnerships().size(); i++) {
+                System.out.println(players.getFirst().getOwnerships().get(i).getCountryName() + "       *         " + players.getLast().getOwnerships().get(i).getCountryName());
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("Ownership status per player")
+    public void OwnershipCountriesPerPlayer() throws FileNotFoundException {
+        GivenPlayersAndBoardThenDistributeRandomlyCountriesThenReturnPlayersOwnership();
+
     }
 
 

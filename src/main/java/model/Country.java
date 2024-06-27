@@ -8,7 +8,12 @@ public interface Country {
     int continentId = 0;
     List<Integer> borders = null;
     String ownership = "";
-    int armies = 0;
+    int armyPayOff = 0;
+
     void setBorders(List<Integer> borders);
     List<Integer> getBorders();
+
+    int getCountryId();
+
+    String getCountryName();
 }

@@ -1,3 +1,4 @@
+import constants.constants;
 import model.*;
 import service.MapFetchService;
 
@@ -13,6 +14,9 @@ import service.UserRegistrationService;
 
 import static org.junit.Assert.*;
 
+/**
+ * Tests have been writing using Spain map
+ */
 @SpringBootConfiguration
 public class MapFetchTest {
     //TODO-- Dependency Injection to Implement
@@ -23,8 +27,9 @@ public class MapFetchTest {
     @DisplayName("Checks file is a valid map")
     public void GivenMapWhenReadThenChecksFileIntegrity() throws FileNotFoundException {
         //ARRANGE
-        //String mapFile = constants.PATH + "brazil/brasil.map";
-        String filename = "spain/spain.map";
+        //String mapFile = constants.PATH + "brazil/brazil.map";
+        String filename = constants.MAP;
+
         int checks = 0;
 
         //ACT
@@ -109,7 +114,7 @@ public class MapFetchTest {
     @DisplayName("Fetches map from file map and does the mapping towards the object Continent and Country model")
     public void GivenMapWhenReadThenFetchMapToObjectModel() throws FileNotFoundException {
         //ARRANGE
-        String filename = "spain/spain.map";
+        String filename = constants.MAP;
         BoardImpl board = new BoardImpl();
         //ACT
         board = MapFetchService.translatorToBoard(filename);
@@ -124,7 +129,7 @@ public class MapFetchTest {
     @DisplayName("Random and even distribution of countries between 2 players")
     public void GivenPlayersAndBoardThenDistributeRandomlyCountriesThenReturnPlayersOwnership() throws FileNotFoundException {
         //ARRANGE
-        String filename = "spain/spain.map";
+        String filename = constants.MAP;
         BoardImpl board = new BoardImpl();
         board = MapFetchService.translatorToBoard(filename);
 

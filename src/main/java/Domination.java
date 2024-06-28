@@ -1,3 +1,4 @@
+import constants.constants;
 import model.Board;
 import model.BoardImpl;
 import model.Player;
@@ -13,7 +14,7 @@ public class Domination {
         System.out.println("Domination game -- To conquer the world");
 
         //Map selection
-        String filename = "spain/spain.map";
+        String filename = constants.MAP;
         BoardImpl board = new BoardImpl();
         board = MapFetchService.translatorToBoard(filename);
         System.out.println("Let's begin - Default map is <Spain>");

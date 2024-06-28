@@ -14,10 +14,10 @@ public class GameStatusService {
 
         for (Player player : players) {
             for (int i = 0; i < players.getFirst().getOwnerships().size(); i++) {
-                String spaces = " ".repeat(10 - players.getFirst().getOwnerships().get(i).getCountryName().length()); //for spacing alignment (10 is the longest word)
+                //TODO - Bug found when the count surpassed the longest word if is superior to 20
+                String spaces = " ".repeat(20 - players.getFirst().getOwnerships().get(i).getCountryName().length()); //for spacing alignment (10 is the longest word)
                 System.out.println("| " + players.getFirst().getOwnerships().get(i).getCountryName() + spaces + "| " + players.getLast().getOwnerships().get(i).getCountryName() + " ");
             }
         }
     }
-
 }

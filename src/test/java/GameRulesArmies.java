@@ -1,9 +1,7 @@
 import constants.constants;
-import model.Board;
 import model.BoardImpl;
-import model.Continent;
 import model.PlayerImpl;
-import service.MapFetchService;
+
 
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -11,9 +9,11 @@ import java.io.FileNotFoundException;
 import java.util.List;
 
 import org.springframework.boot.SpringBootConfiguration;
+
 import service.OwnershipService;
 import service.PlayerService;
-import service.UserRegistrationService;
+import service.MapFetchService;
+import service.ArmiesService;
 
 import static org.junit.Assert.*;
 
@@ -50,4 +50,32 @@ public class GameRulesArmies {
         //ASSERT
         assertNotEquals(0, continents.size());
     }
+
+    @Test
+    @DisplayName("Returns correct number of armies for a turn for a player")
+    public void returnArmiesForPlayer() throws FileNotFoundException {
+        //ARRANGE -- Setting up the game board and players
+        String filename = constants.MAP;
+
+        BoardImpl board = new BoardImpl();
+        board = MapFetchService.translatorToBoard(filename);
+        System.out.println("Let's begin - Default map is <Spain>");
+
+        //User registration and players creation
+        String username = "Chilean God";
+        List<PlayerImpl> players = PlayerService.createPlayers(username);
+        // Random allocation of countries ownership
+        OwnershipService.randomCountryAllocation(players, board); //we send the initial board to do the random setting
+
+        //ACT
+        int armiesStart = ArmiesService.armiesProvider(board, players.getFirst(), true);
+
+        //ASSERT
+        //if first turn -- 2nd arg is true
+        assertEquals(armiesStart, (players.getFirst().getOwnerships().size())*2);
+        //if game player (after first turn, 2nd arg is false)
+        int armies2ndTurn = ArmiesService.armiesProvider(board, players.getFirst(), false);
+        assertTrue(players.getFirst().getOwnerships().size()/3 <= armies2ndTurn); // continent is random (0 to N armies can be assigned) and assuming is alive
+    }
+
 }

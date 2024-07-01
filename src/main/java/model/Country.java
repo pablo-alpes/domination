@@ -14,6 +14,6 @@ public interface Country {
     List<Integer> getBorders();
 
     int getCountryId();
-
+    int getContinentId();
     String getCountryName();
 }

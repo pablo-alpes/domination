@@ -21,7 +21,7 @@ public class OwnershipService {
      */
     public static void randomCountryAllocation(List<PlayerImpl> players, BoardImpl board) {
         int countriesSize = board.getCountries().size();
-        List<Country> countriesCopy = board.getCountries(); // TODO-- deep copy needed, to check how to do so
+        List<Country> countriesCopy = new ArrayList<Country>(board.getCountries()); // Deep copy of the list:  https://stackoverflow.com/questions/10457087/how-to-copy-java-util-list-collection
         int evenDistribution = countriesSize / constants.PLAYERS;
 
         for (int i = 0; i < evenDistribution; i++) {
@@ -50,6 +50,32 @@ public class OwnershipService {
         return random.ints(min, max)
                 .findFirst()
                 .getAsInt();
+    }
+
+    /**
+     * Which  continents does the player own knowing their country ownerships?
+     *
+     * @param board
+     * @param player
+     * @return  Lists the continentId which he owns based on their country ownership
+     */
+    public static List<Integer> continentOwnershipByPlayer(BoardImpl board, PlayerImpl player) {
+        List <Continent> continentsBoard = new ArrayList<Continent>(board.getContinents());
+        List<Country> countriesBoard = new ArrayList<Country>(board.getCountries()); // I can get the maps continent id , List<countries>
+        List<Integer> continentsOwned = new ArrayList<Integer>();
+
+        //checking for each continent, the players' countries' ownership
+        for (int i = 0; i < continentsBoard.size(); i++) {
+            int finalI = i;
+
+            //NB : The game dynamic of ownership is capture in the player object.
+            List<Country> playerContinentCountries = player.getOwnerships().stream().filter(country -> country.getContinentId() == (finalI +1)).toList();
+            List<Country> totalCountriesInContinent = countriesBoard.stream().filter(country -> country.getContinentId() == (finalI +1)).toList();
+            if (playerContinentCountries.containsAll(totalCountriesInContinent)) { //checks the subset of countries for the continent the player owns correspond to a whole continent
+                continentsOwned.add(i+1); //if so, we add the continent Id
+            }
+        }
+        return continentsOwned;
     }
 
 }

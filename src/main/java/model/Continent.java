@@ -9,4 +9,6 @@ public interface Continent {
     String ownership = null;
     List<Country> countries = null;
 
+    public int getContinentArmy();
+
 }

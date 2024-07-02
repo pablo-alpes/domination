@@ -16,4 +16,8 @@ public interface Country {
     int getCountryId();
     int getContinentId();
     String getCountryName();
+
+    void setArmies(int totalArmies);
+
+    public int getArmies();
 }

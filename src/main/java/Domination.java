@@ -25,6 +25,11 @@ public class Domination {
         // Random allocation of countries ownership
         OwnershipService.randomCountryAllocation(players, board); //we send the initial board to do the random setting
 
+        // Random allocation of armies per ownership of each player
+        ArmiesService.armiesRandomAllocationPerPlayer(board, players.getFirst());
+        ArmiesService.armiesRandomAllocationPerPlayer(board, players.getLast());
+
+
         GameStatusService.ownershipStatus(username, players);
         //ACT
         /* Game sequence

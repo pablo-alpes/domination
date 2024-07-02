@@ -13,10 +13,10 @@ public class GameStatusService {
         System.out.println("--------------------------------");
 
         for (Player player : players) {
-            for (int i = 0; i < players.getFirst().getOwnerships().size(); i++) {
+            for (int i = 0; i < players.getFirst().getOwnerships().size(); i++) { //assuming both players have same number of countries
                 //TODO - Bug found when the count surpassed the longest word if is superior to 20
                 String spaces = " ".repeat(20 - players.getFirst().getOwnerships().get(i).getCountryName().length()); //for spacing alignment (10 is the longest word)
-                System.out.println("| " + players.getFirst().getOwnerships().get(i).getCountryName() + spaces + "| " + players.getLast().getOwnerships().get(i).getCountryName() + " ");
+                System.out.println("| " + players.getFirst().getOwnerships().get(i).getCountryName() + "(" + players.getFirst().getOwnerships().get(i).getArmies() + ")" + spaces + "| " + players.getLast().getOwnerships().get(i).getCountryName() + "(" + + players.getLast().getOwnerships().get(i).getArmies() + ")" + " ");
             }
         }
     }

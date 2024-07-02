@@ -78,4 +78,29 @@ public class GameRulesArmies {
         assertTrue(players.getFirst().getOwnerships().size()/3 <= armies2ndTurn); // continent is random (0 to N armies can be assigned) and assuming is alive
     }
 
+    @Test
+    @DisplayName("Returns random assignment of armies per player")
+    public void assignsArmiesPerPlayer() throws FileNotFoundException {
+        //ARRANGE -- Setting up the game board and players
+        String filename = constants.MAP;
+
+        BoardImpl board = new BoardImpl();
+        board = MapFetchService.translatorToBoard(filename);
+        System.out.println("Let's begin - Default map is <Spain>");
+
+        //User registration and players creation
+        String username = "Chilean God";
+        List<PlayerImpl> players = PlayerService.createPlayers(username);
+        // Random allocation of countries ownership
+        OwnershipService.randomCountryAllocation(players, board); //we send the initial board to do the random setting
+
+        //ACT
+        ArmiesService.armiesRandomAllocationPerPlayer(board, players.getFirst());
+        ArmiesService.armiesRandomAllocationPerPlayer(board, players.getLast());
+
+        //ASSERT
+        assertTrue(players.getFirst().getOwnerships().getFirst().getArmies()>0);
+        assertTrue(players.getLast().getOwnerships().getLast().getArmies()>0);
+    }
+
 }

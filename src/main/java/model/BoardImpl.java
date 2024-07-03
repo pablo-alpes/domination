@@ -28,4 +28,27 @@ public class BoardImpl implements Board {
         this.players.add(player);
     }
 
+    public List<Continent> getContinents() {
+        return continents;
+    }
+
+    public void setContinents(List<Continent> continents) {
+        this.continents = continents;
+    }
+
+    public List<Country> getCountries() {
+        return countries;
+    }
+
+    public void setCountries(List<Country> countries) {
+        this.countries = countries;
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(List<Player> players) {
+        this.players = players;
+    }
 }

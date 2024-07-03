@@ -42,7 +42,7 @@ public class Domination {
             - Define the rule of cards and deck, are they going to be implemented?
             - Once the capture happens, and number of attacks, how to reinforce troops per player.
         5. Ask for a move: MoveExecutionService
-        6. Execute the move checking whether is valid: MoveCheckService
+        6. Execute the move checking whether is valid: ©
         7. Define game continuation rules : a Game check service to do so ?
         7. Repeat the cycle until world is conquered by one player:
          */

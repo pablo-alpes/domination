@@ -1,13 +1,13 @@
 package service;
 
 
-import model.Board;
 import model.BoardImpl;
 import model.Country;
 import model.PlayerImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class ArmiesService {
     /**
@@ -71,7 +71,7 @@ public class ArmiesService {
                 totalArmies = totalArmies - 1;
 
                 if ((totalArmies > 0) & (countries.getLast() == country)) { // still troops remaining and all countries transversed, we restart
-                    countries = countries.reversed();
+                    countries = countries.reversed(); //we turn tables
                     country = countries.getFirst();
                 }
                 if (totalArmies == 0) {
@@ -80,6 +80,28 @@ public class ArmiesService {
             }
         }
 
+    }
+
+    /**
+     * Returns for the country/city and player asked if whether it's owned by player
+     * and the army count if the case
+     * @param player
+     * @param mapName (String)
+     * @return int army count for the country (input in String)
+     */
+    public static int armiesForPlayerByCountryName(PlayerImpl player, String mapName) {
+        int armiesForTheCountryPlayer;
+
+        try {
+            armiesForTheCountryPlayer = (player.getOwnerships()).stream()
+                    .filter(country -> (country.getCountryName()).equals(mapName))
+                    .toList()
+                    .getFirst()
+                    .getArmies();
+        } catch (NoSuchElementException e) {
+            armiesForTheCountryPlayer = -1;
+        }
+        return armiesForTheCountryPlayer;
     }
 }
 

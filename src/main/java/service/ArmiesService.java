@@ -47,7 +47,7 @@ public class ArmiesService {
      * @return armies = 2 * number of countries - 10% (to make some countries have less Strength)
      */
     public static int armiesByInitialGame(PlayerImpl player) {
-        return (int) (player.getOwnerships().size() * 2 * (1 - 0.1));
+        return (int) (player.getOwnerships().size() * 3 * (1 - 0.1)); //TODO -- 3 so to test better the possibilities within the scenario
     }
 
     public static int armiesProvider(BoardImpl board, PlayerImpl player, boolean firstPlay) {
@@ -103,6 +103,7 @@ public class ArmiesService {
         }
         return armiesForTheCountryPlayer;
     }
+
 }
 
 

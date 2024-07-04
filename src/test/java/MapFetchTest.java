@@ -160,6 +160,13 @@ public class MapFetchTest {
 
     }
 
+    public static Country geCountryByNameForPlayer(PlayerImpl player, String mapName) {
+        return player.getOwnerships().stream()
+                .filter(country -> (country.getCountryName()).equals(mapName))
+                .toList()
+                .getFirst();
+    }
+
 
 }
 

@@ -62,7 +62,7 @@ public class AttackMoveTest {
         //act
         //String countryFrom = players.getFirst().getOwnerships().getFirst().getCountryName();
         GameStatusService.ownershipStatus(username, players);
-        GameRulesService.diceRollup(players, board);
+        GameRulesService.diceRollup(players, board, 2);
         GameStatusService.ownershipStatus(username, players);
     }
 }

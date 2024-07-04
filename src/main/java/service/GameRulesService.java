@@ -2,117 +2,151 @@ package service;
 
 import model.BoardImpl;
 import model.Country;
+import model.Player;
 import model.PlayerImpl;
 
 import java.util.*;
 
 public class GameRulesService {
     //dice rollup and its result
-    public static void diceRollup(List<PlayerImpl> players, BoardImpl board) {
-        //player objectives
+    public static void diceRollup(List<PlayerImpl> players, BoardImpl board, int playerTurn) {
+        //player definition : for readability
+        PlayerImpl p1 = players.getFirst();
+        PlayerImpl p2 = players.getLast();
+        PlayerImpl attacker = new PlayerImpl();
+        PlayerImpl defender = new PlayerImpl();
 
+        //player objectives
+        String countryFrom = "";
+        int countryFromId = -1;
         //player wants to attack from a country he owns (to check that) : from
-        //String countryFrom = getCountryFrom(); // TODO -- FOR AI : and to say who's is in what side so to adapt the other side accordingly
-        String countryFrom = players.getFirst().getOwnerships().getFirst().getCountryName(); //TODO -- for testing only
-        int countryFromId = getCountryIndexOfFromCountryObject(getCountryByNameForPlayer(players.getFirst(), countryFrom), players.getFirst());
+        switch(playerTurn) {
+            case 1:
+                //human
+                attacker = p1;
+                defender = p2;
+                countryFrom = getCountryFrom();
+                countryFromId = getCountryIndexOfFromCountryObject(getCountryByNameForPlayer(p1, countryFrom), p1);
+                break;
+            case 2: //machine
+                //subset of countries can attack (ie at least 2 armies)
+                attacker = p2;
+                defender = p1;
+                List<Country> possibleCountries = p2.getOwnerships().stream()
+                        .filter(country -> country.getArmies()>1)
+                        .toList();
+                Random randCountry = new Random();
+                int countryRand = randCountry.nextInt(0, possibleCountries.size());
+                countryFrom = possibleCountries.get(countryRand).getCountryName(); //simply strategy of getting random country each time out of the ones can attack (ie at least 2 troops)
+                countryFromId = getCountryIndexOfFromCountryObject(getCountryByNameForPlayer(p2, countryFrom), p2);
+                break;
+        }
 
         String countryNameTarget;
-        int countryTargetId;
+        int countryTargetId = -1;
         //checks if that country has the mininum of 2 armies to attack
-        if (checksPlayerHasMinimumOf2Armies(players.getFirst(), board, countryFrom)) {
-            List<Integer> bordersToAttack = new ArrayList<Integer>(getBorders(players.getFirst(), countryFrom));
+        if (checksPlayerHasMinimumOf2Armies(attacker, board, countryFrom)) {
+            List<Integer> bordersToAttack = new ArrayList<Integer>(getBorders(attacker, countryFrom));
             //target : player sees options to attack and picks one (options based on borders)
             //and excludes the ones he owns
 
-            bordersToAttack.removeIf(countryId -> (getByCountryIdForPlayer(players.getLast(), countryId) == 0));
+            PlayerImpl finalDefender = defender;
+            bordersToAttack.removeIf(countryId -> (getByCountryIdForPlayer(finalDefender, countryId) == 0));
 
             System.out.println("The country you choose to attack from is:"+ countryFrom);
             System.out.println("Your choices to attack are:");
             System.out.println(bordersToAttack);
 
-            // TODO -- FOR AI
-            countryTargetId = bordersToAttack.getLast(); // to find out where is storaged in the P2
-
+            // TODO -- FOR HUMAN
+            switch(playerTurn) {
+                case 1: //human
+                    //TODO - Testing input request, for simplicity just the last for testing
+                    countryTargetId = bordersToAttack.getLast(); // to find out where is storaged in the P2 -> Done in countryIndex
+                    break;
+                case 2: //machine // random selection
+                    Random randBorder = new Random();
+                    int borderRand = randBorder.nextInt(0, bordersToAttack.size()-1);
+                    countryTargetId = bordersToAttack.get(borderRand);
+                    break;
+            }
             countryNameTarget = board.getCountries().get(countryTargetId).getCountryName();
-            //TODO -- for testing purposes
-            int countryTargetIndex = getCountryIndexOfFromCountryObject(getCountryByNameForPlayer(players.getLast(), countryNameTarget), players.getLast());
+
+            int countryTargetIndex = getCountryIndexOfFromCountryObject(getCountryByNameForPlayer(defender, countryNameTarget), defender);
 
             System.out.println("You'll attack to:"+ countryNameTarget);
             //tactics of battle
             //attacker: player decide to put number to attack into the target territory : from 1 to 3
             System.out.println("How many armies to deploy to to attack (1 to 3):");
-            int p1DiceNumber = 3;
+            int attackerDiceNumber = 3;
+            System.out.println("Selected 3 armies to deploy.");
             //defender: AI decides to put number to put to defend : 1 to 2 (from anywhere if the country has not? TBC)
-            System.out.println("AI decides to defend with 2 armies");
-            int p2DiceNumber = 2;
+            System.out.println("Defender decides to deploy 2 armies");
+            int defenderDiceNumber = 2;
             //define the number of dices to launch for attacker based on the number of attacker armies (1 to 3 where 1 dice = 1 army)
             // always 2 for defender
 
+            // TODO -- SHIFT VARIABLES TO ENSURE DICES CORRESPOND TO RIGHT ATTACKER / DEFENDER AND THE REST OF THE CODE
             //dices roll up for each player and ordering them
             //https://howtodoinjava.com/java8/convert-intstream-collection-array/
             Random randInt = new Random();
-            List<Integer> dicesP1 = randInt.ints(p1DiceNumber, 1, 6)
+            List<Integer> dicesAttacker = randInt.ints(attackerDiceNumber, 1, 6)
                     .boxed()
                     .sorted()
                     .toList();
-            List<Integer> dicesP2 = randInt.ints(p2DiceNumber, 1, 6)
+            List<Integer> dicesDefender = randInt.ints(defenderDiceNumber, 1, 6)
                     .boxed()
                     .sorted()
                     .toList();
             //organizing pars from max to min values
-            dicesP1 = dicesP1.reversed();
-            dicesP2 = dicesP2.reversed();
+            dicesAttacker = dicesAttacker.reversed();
+            dicesDefender = dicesDefender.reversed();
             //counter of end result after battle
-            int armiesP1BattleResult = 0;
-            int armiesP2BattleResult = 0;
+            int armiesAttackerBattleResult = 0;
+            int armiesDefenderBattleResult = 0;
 
             //result of each dice
-            System.out.println("P1 dices: " + dicesP1);
-            System.out.println("P2 dices: " + dicesP2);
+            System.out.println("Attacker dices: " + dicesAttacker);
+            System.out.println("Defender dices: " + dicesDefender);
 
-            int armiesAttacking = p1DiceNumber;
-            int armiesDefending = p2DiceNumber;
+            int armiesAttacking = attackerDiceNumber;
+            int armiesDefending = defenderDiceNumber;
 
             //comparison of pairs winner: 3 scenarios according rules
-            for (int i = 0; i < p2DiceNumber; i++) {
+            for (int i = 0; i < defenderDiceNumber; i++) {
                 if (armiesAttacking == 0) break; //Stops the battle if any of the player are left out of armies to defend or attack
                 if (armiesDefending == 0) break;
 
-                if (dicesP1.get(i) > dicesP2.get(i)) {
-                    armiesP2BattleResult--;// p1 wins , p2 looses: -1 army
+                if (dicesAttacker.get(i) > dicesDefender.get(i)) {
+                    armiesDefenderBattleResult--;// p-Attacker wins , p-defender looses: -1 army
                     armiesDefending--;
                 }
-                if (Objects.equals(dicesP1.get(i), dicesP2.get(i))) {
-                    armiesP1BattleResult--;// p1 looses : -1 army , p2 wins
+                if (Objects.equals(dicesAttacker.get(i), dicesDefender.get(i))) {
+                    armiesAttackerBattleResult--;// p-attacker looses : -1 army , p-defender wins
                     armiesAttacking--;
                 }
-                if (dicesP1.get(i) < dicesP2.get(i)) {
-                    armiesP1BattleResult--;// p1 looses : -1 army , p2 wins
+                if (dicesAttacker.get(i) < dicesDefender.get(i)) {
+                    armiesAttackerBattleResult--;// p-attacker looses : -1 army , p-defender wins
                     armiesAttacking--;
                 }
             }
             //end result of the battle in terms of armies
             //defining new armies for each case
-            int p1ArmiesAfterBattle = players.getFirst().getOwnerships().get(countryFromId).getArmies() + armiesP1BattleResult;
-            players.getFirst().getOwnerships().get(countryFromId).setArmies(p1ArmiesAfterBattle);
+            int attackerArmiesAfterBattle = attacker.getOwnerships().get(countryFromId).getArmies() + armiesAttackerBattleResult;
+            attacker.getOwnerships().get(countryFromId).setArmies(attackerArmiesAfterBattle);
 
             ; //it's not the same index for this case
-            int p2ArmiesAfterBattle = players.getLast().getOwnerships().get(countryTargetIndex).getArmies() + armiesP2BattleResult;
-            players.getLast().getOwnerships().get(countryTargetIndex).setArmies(p2ArmiesAfterBattle);
+            int defenderArmiesAfterBattle = defender.getOwnerships().get(countryTargetIndex).getArmies() + armiesDefenderBattleResult;
+            defender.getOwnerships().get(countryTargetIndex).setArmies(defenderArmiesAfterBattle);
 
             //battle result
             System.out.println("Battle for territory " + countryNameTarget + " ended");
-            System.out.println("P1 =" + armiesP1BattleResult + " armies lost " + "- P2 = " + armiesP2BattleResult + " armies lost ");
+            System.out.println("Attacker =" + armiesAttackerBattleResult + " armies lost " + "- Defender = " + armiesDefenderBattleResult + " armies lost ");
 
             //if armies defending = 0 then it needs to change ownership between players
-            if ((armiesDefending == 0) && (players.getLast().getOwnerships().get(countryTargetIndex).getArmies() == 0)) {
-                players.getFirst().getOwnerships().add(players.getLast().getOwnerships().get(countryTargetIndex)); //adds to the new ownership
-                players.getLast().getOwnerships().remove(players.getLast().getOwnerships().get(countryTargetIndex)); // removes from the old ownership
+            if ((armiesDefending == 0) && (defender.getOwnerships().get(countryTargetIndex).getArmies() == 0)) {
+                attacker.getOwnerships().add(defender.getOwnerships().get(countryTargetIndex)); //adds to the new ownership
+                defender.getOwnerships().remove(defender.getOwnerships().get(countryTargetIndex)); // removes from the old ownership
             }
-            //viceversa, if AI attacked and won
-            //if ((armiesAttacking == 0) && (players.getFirst().getOwnerships().get(countryTargetIdP2).getArmies() == 0)) {
-            //    players.getFirst().getOwnerships().add(players.getLast().getOwnerships().get(countryTargetIdP2)); //adds to the new ownership
-            //    players.getLast().getOwnerships().remove(board.getCountries().get(countryTargetIdP2)); // removes from the old ownership
 
         } else {
             System.out.println("Not enough armies to attack from " + countryFrom  + " (at least 2 armies are needed)");

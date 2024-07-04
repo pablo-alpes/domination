@@ -29,14 +29,16 @@ public class Domination {
         ArmiesService.armiesRandomAllocationPerPlayer(board, players.getFirst());
         ArmiesService.armiesRandomAllocationPerPlayer(board, players.getLast());
 
-
         GameStatusService.ownershipStatus(username, players);
+
+
+
         //ACT
         /* Game sequence
-        1. Choose the player name: PlayerService
-        2. Assign randomly the countries: OwnershipService
-        3. Define armies initial distribution and do random allocation as well (to simplify).
-        3. Show ownerships to each player: GameStatusService
+        1. Choose the player name: PlayerService OK
+        2. Assign randomly the countries: OwnershipService OK
+        3. Define armies initial distribution and do random allocation as well (to simplify). OK
+        3. Show ownerships to each player: GameStatusService OK
         4. Assign turns until a player is "alive": TurnsService
         4.5 Troops' reinforcement:
             - Define the rule of cards and deck, are they going to be implemented?

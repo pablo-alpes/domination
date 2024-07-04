@@ -12,7 +12,7 @@ public class GameRulesService {
         //player objectives
 
         //player wants to attack from a country he owns (to check that) : from
-        //String countryFrom = getCountryFrom();
+        //String countryFrom = getCountryFrom(); // TODO -- FOR AI : and to say who's is in what side so to adapt the other side accordingly
         String countryFrom = players.getFirst().getOwnerships().getFirst().getCountryName(); //TODO -- for testing only
         int countryFromId = getCountryIndexOfFromCountryObject(getCountryByNameForPlayer(players.getFirst(), countryFrom), players.getFirst());
 
@@ -30,7 +30,9 @@ public class GameRulesService {
             System.out.println("Your choices to attack are:");
             System.out.println(bordersToAttack);
 
+            // TODO -- FOR AI
             countryTargetId = bordersToAttack.getLast(); // to find out where is storaged in the P2
+
             countryNameTarget = board.getCountries().get(countryTargetId).getCountryName();
             //TODO -- for testing purposes
             int countryTargetIndex = getCountryIndexOfFromCountryObject(getCountryByNameForPlayer(players.getLast(), countryNameTarget), players.getLast());

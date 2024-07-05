@@ -22,4 +22,9 @@ public class PlayerService {
 
         return players;
     }
+
+    public static boolean playerAlive(PlayerImpl player) {
+        //if they still have territories, they are alive
+        return (!player.getOwnerships().isEmpty());
+    }
 }

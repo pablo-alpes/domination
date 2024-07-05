@@ -22,18 +22,32 @@ public class Domination {
         //User registration and players creation
         String username = UserRegistrationService.getUserName();
         List<PlayerImpl> players = PlayerService.createPlayers(username);
+        PlayerImpl p1 = players.getFirst();
+        PlayerImpl p2 = players.getLast();
         // Random allocation of countries ownership
         OwnershipService.randomCountryAllocation(players, board); //we send the initial board to do the random setting
 
         // Random allocation of armies per ownership of each player
-        ArmiesService.armiesRandomAllocationPerPlayer(board, players.getFirst());
-        ArmiesService.armiesRandomAllocationPerPlayer(board, players.getLast());
+        ArmiesService.armiesRandomAllocationPerPlayer(board, p1);
+        ArmiesService.armiesRandomAllocationPerPlayer(board, p2);
+        int turn = 1; //by default, we just start with player one
 
-        GameStatusService.ownershipStatus(username, players);
+        while (PlayerService.playerAlive(p1) && PlayerService.playerAlive(p2)) {
+            GameStatusService.ownershipStatus(username, players);
+            GameRulesService.diceRollup(players, board, turn);
+            //shifting turnsk
+            switch (turn) {
+                case 1:
+                    System.out.println("Turn of " + p2.getName() + " to play");
+                    turn++;
+                    break;
+                case 2:
+                    System.out.println("Turn of " + p1.getName() + "to play");
+                    turn--;
+                    break;
+            }
 
-
-
-        //ACT
+            //ACT
         /* Game sequence
         1. Choose the player name: PlayerService OK
         2. Assign randomly the countries: OwnershipService OK
@@ -48,6 +62,10 @@ public class Domination {
         7. Define game continuation rules : a Game check service to do so ?
         7. Repeat the cycle until world is conquered by one player:
          */
+
+
+        }
+        System.out.println("Game is finished.");
 
     }
 }

@@ -42,7 +42,7 @@ public class GameRulesService {
                 break;
         }
 
-        String countryNameTarget;
+        String countryNameTarget = "";
         int countryTargetId = -1;
         //checks if that country has the mininum of 2 armies to attack
         if (checksPlayerHasMinimumOf2Armies(attacker, board, countryFrom)) {
@@ -57,35 +57,41 @@ public class GameRulesService {
             System.out.println("Your choices to attack are:");
             System.out.println(bordersToAttack);
 
-            // TODO -- FOR HUMAN
+            for (int i = 0; i < bordersToAttack.size(); i++) {
+                System.out.println(board.getCountries().get(bordersToAttack.get(i)-1).getCountryName());
+            }
+
             switch(playerTurn) {
                 case 1: //human
-                    //TODO - Testing input request, for simplicity just the last for testing
-                    countryTargetId = bordersToAttack.getLast(); // to find out where is storaged in the P2 -> Done in countryIndex
+                    countryNameTarget = getCountryFrom();
+                    //countryTargetId = getCountryIndexOfFromCountryObject(getCountryByNameForPlayer(attacker, countryTargetAttacker), attacker);
+                    //countryTargetId = bordersToAttack.getLast(); // to find out where is storaged in the P2 -> Done in countryIndex
                     break;
-                case 2: //machine // random selection
+                case 2:  //machine - random selection
                     Random randBorder = new Random();
-                    int borderRand = randBorder.nextInt(0, bordersToAttack.size()-1);
-                    countryTargetId = bordersToAttack.get(borderRand);
+                    int borderRand = 0;
+                    if (bordersToAttack.size() > 1) { //if more than 1 element
+                        borderRand = randBorder.nextInt(0, bordersToAttack.size()-1);
+                    }
+                    countryTargetId = bordersToAttack.get(borderRand) - 1; //changing index, since its starts in 0 (and not in 0)
+                    countryNameTarget = board.getCountries().get(countryTargetId).getCountryName();
                     break;
             }
-            countryNameTarget = board.getCountries().get(countryTargetId).getCountryName();
 
             int countryTargetIndex = getCountryIndexOfFromCountryObject(getCountryByNameForPlayer(defender, countryNameTarget), defender);
 
             System.out.println("You'll attack to:"+ countryNameTarget);
             //tactics of battle
+            //define the number of dices to launch for attacker based on the number of attacker armies (1 to 3 where 1 dice = 1 army)
+
             //attacker: player decide to put number to attack into the target territory : from 1 to 3
             System.out.println("How many armies to deploy to to attack (1 to 3):");
-            int attackerDiceNumber = 3;
+            int attackerDiceNumber = 3; // TODO -- They can chose here from 1 to 3, default 3
             System.out.println("Selected 3 armies to deploy.");
             //defender: AI decides to put number to put to defend : 1 to 2 (from anywhere if the country has not? TBC)
             System.out.println("Defender decides to deploy 2 armies");
-            int defenderDiceNumber = 2;
-            //define the number of dices to launch for attacker based on the number of attacker armies (1 to 3 where 1 dice = 1 army)
-            // always 2 for defender
+            int defenderDiceNumber = 2; // TODO -- They can chose here from 1 to 2, default 2
 
-            // TODO -- SHIFT VARIABLES TO ENSURE DICES CORRESPOND TO RIGHT ATTACKER / DEFENDER AND THE REST OF THE CODE
             //dices roll up for each player and ordering them
             //https://howtodoinjava.com/java8/convert-intstream-collection-array/
             Random randInt = new Random();
@@ -97,7 +103,8 @@ public class GameRulesService {
                     .boxed()
                     .sorted()
                     .toList();
-            //organizing pars from max to min values
+
+            //organizing pairs from max to min values
             dicesAttacker = dicesAttacker.reversed();
             dicesDefender = dicesDefender.reversed();
             //counter of end result after battle
@@ -111,7 +118,7 @@ public class GameRulesService {
             int armiesAttacking = attackerDiceNumber;
             int armiesDefending = defenderDiceNumber;
 
-            //comparison of pairs winner: 3 scenarios according rules
+            //comparison of winner pairs: 3 scenarios according rules
             for (int i = 0; i < defenderDiceNumber; i++) {
                 if (armiesAttacking == 0) break; //Stops the battle if any of the player are left out of armies to defend or attack
                 if (armiesDefending == 0) break;
@@ -145,6 +152,7 @@ public class GameRulesService {
             //if armies defending = 0 then it needs to change ownership between players
             if ((armiesDefending == 0) && (defender.getOwnerships().get(countryTargetIndex).getArmies() == 0)) {
                 attacker.getOwnerships().add(defender.getOwnerships().get(countryTargetIndex)); //adds to the new ownership
+                attacker.getOwnerships().getLast().setArmies(armiesAttackerBattleResult); //Leaves the armies that survive in the new territory
                 defender.getOwnerships().remove(defender.getOwnerships().get(countryTargetIndex)); // removes from the old ownership
             }
 

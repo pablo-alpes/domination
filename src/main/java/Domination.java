@@ -1,12 +1,11 @@
 import constants.constants;
-import model.Board;
 import model.BoardImpl;
-import model.Player;
 import model.PlayerImpl;
 import service.*;
 
 import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.Random;
 
 public class Domination {
     public static void main(String... args) throws FileNotFoundException {
@@ -22,27 +21,58 @@ public class Domination {
         //User registration and players creation
         String username = UserRegistrationService.getUserName();
         List<PlayerImpl> players = PlayerService.createPlayers(username);
-        PlayerImpl p1 = players.getFirst();
-        PlayerImpl p2 = players.getLast();
         // Random allocation of countries ownership
         OwnershipService.randomCountryAllocation(players, board); //we send the initial board to do the random setting
 
         // Random allocation of armies per ownership of each player
-        ArmiesService.armiesRandomAllocationPerPlayer(board, p1);
-        ArmiesService.armiesRandomAllocationPerPlayer(board, p2);
+        ArmiesService.armiesRandomAllocationPerPlayer(board, players.getFirst());
+        ArmiesService.armiesRandomAllocationPerPlayer(board, players.getLast());
+
         int turn = 1; //by default, we just start with player one
 
+        PlayerImpl p1 = players.getFirst();
+        PlayerImpl p2 = players.getLast();
+
+        Random rand = new Random();
+
         while (PlayerService.playerAlive(p1) && PlayerService.playerAlive(p2)) {
+            //reinforcement of troops -- done randomnly
+
+            //checks if game is possible to continue or declares Draw
+            if (PlayerService.declareDraw(players)) {
+                System.out.println("Draw. Game is finished.");
+                break;
+            }
+
+            //Game ownership status is launch
             GameStatusService.ownershipStatus(username, players);
-            GameRulesService.diceRollup(players, board, turn);
-            //shifting turnsk
+            if (GameRulesService.diceRollup(players, board, turn) == -1) { //we relaunch the choice because the country didn't have borders to attack
+                GameRulesService.diceRollup(players, board, turn);
+            };
+            //shifting turns
             switch (turn) {
                 case 1:
-                    System.out.println("Turn of " + p2.getName() + " to play");
+                    System.out.println(">> Turn of " + p2.getName() + " to play");
+
+                    int newTroopsP2 = ArmiesService.armiesProvider(board, p2, false);
+                    int randomCountryP2 = rand.nextInt(0, p2.getOwnerships().size()-1);
+                    newTroopsP2 += p2.getOwnerships().get(randomCountryP2).getArmies(); //to refine because it's overwriting
+                    p2.getOwnerships().get(randomCountryP2).setArmies(newTroopsP2);
+                    System.out.println(">> Troops reinforcement have arrived.");
+                    System.out.println(">>" + newTroopsP2 + " Troops reinforcement have arrived. They were all sent to a random country.");
+
                     turn++;
                     break;
+
                 case 2:
-                    System.out.println("Turn of " + p1.getName() + "to play");
+                    System.out.println(">> Turn of " + p1.getName() + " to play");
+
+                    int newTroopsP1 = ArmiesService.armiesProvider(board, p1, false);
+                    int randomCountryP1 = rand.nextInt(0, p1.getOwnerships().size()-1);
+                    newTroopsP1 += p1.getOwnerships().get(randomCountryP1).getArmies();
+                    p1.getOwnerships().get(randomCountryP1).setArmies(newTroopsP1);
+                    System.out.println(">>" + newTroopsP1 + " Troops reinforcement have arrived. They were all sent to a random country.");
+
                     turn--;
                     break;
             }
@@ -69,3 +99,4 @@ public class Domination {
 
     }
 }
+

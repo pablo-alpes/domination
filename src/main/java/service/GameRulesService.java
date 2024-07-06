@@ -2,14 +2,13 @@ package service;
 
 import model.BoardImpl;
 import model.Country;
-import model.Player;
 import model.PlayerImpl;
 
 import java.util.*;
 
 public class GameRulesService {
     //dice rollup and its result
-    public static void diceRollup(List<PlayerImpl> players, BoardImpl board, int playerTurn) {
+    public static int diceRollup(List<PlayerImpl> players, BoardImpl board, int playerTurn) {
         //player definition : for readability
         PlayerImpl p1 = players.getFirst();
         PlayerImpl p2 = players.getLast();
@@ -36,7 +35,15 @@ public class GameRulesService {
                         .filter(country -> country.getArmies()>1)
                         .toList();
                 Random randCountry = new Random();
-                int countryRand = randCountry.nextInt(0, possibleCountries.size());
+                int countryRand = 0;
+                if (!possibleCountries.isEmpty()) {
+                    countryRand = randCountry.nextInt(0, possibleCountries.size());
+                }
+                else {
+                    System.out.println("There's no possible countries from where to attack in your board.");
+                    System.out.println("Passing turn to next player."); //TODO ??
+                    return -1;
+                }
                 countryFrom = possibleCountries.get(countryRand).getCountryName(); //simply strategy of getting random country each time out of the ones can attack (ie at least 2 troops)
                 countryFromId = getCountryIndexOfFromCountryObject(getCountryByNameForPlayer(p2, countryFrom), p2);
                 break;
@@ -52,6 +59,12 @@ public class GameRulesService {
 
             PlayerImpl finalDefender = defender;
             bordersToAttack.removeIf(countryId -> (getByCountryIdForPlayer(finalDefender, countryId) == 0));
+
+            if (bordersToAttack.isEmpty()) {
+                System.out.println("The country chosen does not have any borders to attack or all yours");
+                System.out.println("Please select other country.");
+                return -1;
+            }
 
             System.out.println("The country you choose to attack from is:"+ countryFrom);
             System.out.println("Your choices to attack are:");
@@ -77,7 +90,7 @@ public class GameRulesService {
                     countryNameTarget = board.getCountries().get(countryTargetId).getCountryName();
                     break;
             }
-
+            Random randInt = new Random();
             int countryTargetIndex = getCountryIndexOfFromCountryObject(getCountryByNameForPlayer(defender, countryNameTarget), defender);
 
             System.out.println("You'll attack to:"+ countryNameTarget);
@@ -85,16 +98,37 @@ public class GameRulesService {
             //define the number of dices to launch for attacker based on the number of attacker armies (1 to 3 where 1 dice = 1 army)
 
             //attacker: player decide to put number to attack into the target territory : from 1 to 3
+            /**TODO -- TO FIX BASED ON THE NUMBER MAX OF TROOPS THAT THE COUNTRY HAS **/
             System.out.println("How many armies to deploy to to attack (1 to 3):");
-            int attackerDiceNumber = 3; // TODO -- They can chose here from 1 to 3, default 3
-            System.out.println("Selected 3 armies to deploy.");
-            //defender: AI decides to put number to put to defend : 1 to 2 (from anywhere if the country has not? TBC)
-            System.out.println("Defender decides to deploy 2 armies");
-            int defenderDiceNumber = 2; // TODO -- They can chose here from 1 to 2, default 2
+
+            int attackerDiceNumber = 0;
+            if (attacker.getOwnerships().get(countryFromId).getArmies() == 2) {
+                attackerDiceNumber = 1; //required by the game to leave 1 behind the territory of origin
+            }
+            else { //more than 2 armies
+                attackerDiceNumber = randInt.nextInt(2, 3); // Random between 2 and 3 dices;
+            }
+
+            System.out.println("Selected " + attackerDiceNumber + " armies to deploy.");
+            //defender: AI or Player decides to put number to put to defend : 1 to 2 depending number of troops in the territory and within the whole map
+            int defenderDiceNumber = 0;
+            int totalArmiesDefender = defender.getOwnerships()
+                    .stream()
+                    .mapToInt(Country::getArmies)
+                    .sum();
+            if (defender.getOwnerships().get(countryTargetIndex).getArmies() == 0 || defender.getOwnerships().get(countryTargetIndex).getArmies() == 1) {
+                defenderDiceNumber = 1;
+            }
+            else if (totalArmiesDefender == 1) {
+                defenderDiceNumber = 1;
+            } else if (totalArmiesDefender > 1 || defender.getOwnerships().get(countryTargetIndex).getArmies() > 1)  {
+                defenderDiceNumber = randInt.nextInt(1, 2);
+            }
+            System.out.println("Defender decides to deploy " + defenderDiceNumber + " armies");
 
             //dices roll up for each player and ordering them
             //https://howtodoinjava.com/java8/convert-intstream-collection-array/
-            Random randInt = new Random();
+
             List<Integer> dicesAttacker = randInt.ints(attackerDiceNumber, 1, 6)
                     .boxed()
                     .sorted()
@@ -149,17 +183,24 @@ public class GameRulesService {
             System.out.println("Battle for territory " + countryNameTarget + " ended");
             System.out.println("Attacker =" + armiesAttackerBattleResult + " armies lost " + "- Defender = " + armiesDefenderBattleResult + " armies lost ");
 
-            //if armies defending = 0 then it needs to change ownership between players
-            if ((armiesDefending == 0) && (defender.getOwnerships().get(countryTargetIndex).getArmies() == 0)) {
+            //Ownership changes if winner destroys all the armies of the opponent
+            if (defender.getOwnerships().get(countryTargetIndex).getArmies() < 1) {
                 attacker.getOwnerships().add(defender.getOwnerships().get(countryTargetIndex)); //adds to the new ownership
-                attacker.getOwnerships().getLast().setArmies(armiesAttackerBattleResult); //Leaves the armies that survive in the new territory
-                defender.getOwnerships().remove(defender.getOwnerships().get(countryTargetIndex)); // removes from the old ownership
+                attacker.getOwnerships().getLast().setArmies(armiesAttacking - armiesAttackerBattleResult); //Leaves the armies that survive in the new territory
+                int armiesLeftInCountryFrom = (defender.getOwnerships().get(countryFromId).getArmies() - (armiesAttacking - armiesAttackerBattleResult));
+
+                defender.getOwnerships().remove(countryTargetIndex); // removes from the old ownership the corresponding Id
+
+                //leaves the territory of origin with the right number of armies after leaving the ones survived in battl
+                attacker.getOwnerships().get(countryFromId).setArmies(armiesLeftInCountryFrom);
+
             }
 
         } else {
             System.out.println("Not enough armies to attack from " + countryFrom  + " (at least 2 armies are needed)");
         }
 
+        return 1;
     }
 
     //winner or looser and army count consequence
@@ -171,7 +212,7 @@ public class GameRulesService {
 
     private static boolean checksPlayerHasMinimumOf2Armies(PlayerImpl player, BoardImpl board, String countryAttackFrom) {
         int armiesCheck = ArmiesService.armiesForPlayerByCountryName(player, countryAttackFrom);
-        return armiesCheck >= 2;
+        return armiesCheck > 1;
     }
 
     private static String getCountryFrom() {

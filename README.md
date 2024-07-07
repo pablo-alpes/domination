@@ -1,13 +1,57 @@
-# domination
-* map source comes from Domination: https://domination.sourceforge.io/getmaps.shtml
-  * map structure:
-    *       [continents]
-    North-America 6 yellow <~~ name of the continent (try keep them in that order if you are doing a map of the "real world" as then the missions work. The number is the army value, and the color does totally nothing
-  * <b> Order of continent matters-  since its followed after for the country - continent link </b>
-     
-      *     [countries]
-      * 1 Alaska 1 44 83 <~~ the first number is the number of the country (they do have to be in order) the next one is what continent it belongs to.
-      * the other two numbers are the x and y co-ordinates of the circle that will be put on that country
-    *     [borders]
-   * 1 2 3 38 <~~ the first number is the number of the country (need to be in order here as well I think) and the other numbers that follow are what countries that country is adjacent too  
-   *  source: https://domination.sourceforge.io/makemaps.shtml
+# Domination V1.0
+Juan Pablo Miranda Arismendi - 07 July 2024.
+
+## Requirements
+* Java 21 installed in your Operating System (OS) and with the right environment variable settings.
+* Maven for dependency management (in case you want to recompile the program).
+
+## How to run the game
+Assuming java is installed, for any OS you need to decide where to storage the game.
+
+### For macOS:
+* Either using Finder or by command line you need unzip the program in a target directory.
+* Once done, you open the 'Terminal' application in the launchpad and you navigate where the program is located (using cd).
+* Once there, you do:
+  * java -cp target/domination-1.0.jar Domination
+* The game will start.
+
+###  For windows:
+* Unzip the file using winzip or any other tool in the destination folder.
+* Then you initiate cmd or powershell to run a terminal of command line.
+* In the command line and in the destination folder you do:
+  * java -cp target/domination-1.0.jar Domination
+* The game will start.
+
+If you don't have installed java in your machine, you can download it from here.
+To check your java version you can do in the command line java --version.
+
+## Game instructions 
+### Human turn:
+* By default, the game gives you the first turn.
+* Once you start, the game will prompt your name and your current ownerships will be displayed.
+* The attack commences and it will prompt you where to attack from and to decide a target border. 
+  * Please be mindful on the input the games and respect the exact names, including caps.
+* The valid targets will be selected by the program, but of course try to maximize your chances.
+* Once your attack done, you will see the dices results for each player and the troops maintained or lost.
+  * Note: The dices and the number of armies are automatically selected chosen to attack.
+* If a takeover place, it will appear in the next screen once the turn of the machine will kick in.
+
+### Machine turn:
+  * The machine take it turn, launch the dices and it will again show the results of the battle with the new board displayed.
+
+### Troops Reinforcement:
+  * You have the right to receive troops reinforcements given your country and continents ownership. This will happen everyturn and it will be informed. 
+  * These armies will be destined to a random country of your ownership. 
+  * Same will happen for your opponent.
+
+### End game:
+* The game finishes once a player does not have any armies, or it draws if none of the players can further attack.
+
+## Map selection / change
+* To select any map you can download them from Domination website: https://domination.sourceforge.io/getmaps.shtml
+* You need to recompile the program and just edit the constants file where the path to the map is stated.
+* The new map needs to be stored in the resources folder, and then /country.
+
+## Maven recompilation
+In case you want to recompile the program you need to run:
+* mvn clean install 
